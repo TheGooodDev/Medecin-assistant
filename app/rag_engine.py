@@ -14,6 +14,7 @@ def ask_question(
     temperature: float,
     k: int,
     persist_path: str = "vectorstore",
+    user_api_key: str = None  # 👈 AJOUT ICI
 ) -> None:
     """
     Pose une question à un LLM avec un contexte documentaire vectorisé (RAG).

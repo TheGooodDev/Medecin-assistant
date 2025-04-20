@@ -62,7 +62,8 @@ if st.button("📤 Poser la question") and question:
                 question=question,
                 model_name=model,
                 temperature=temperature,
-                k=k
+                k=k,
+                user_api_key=user_api_key  # 👈 AJOUT ICI
                 )
 
             # 🔸 Layout en deux colonnes
