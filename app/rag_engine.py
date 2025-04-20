@@ -29,7 +29,7 @@ def ask_question(
         None
     """
     # Chargement de la clé API depuis .env
-    load_api_key()
+    load_api_key(user_api_key=user_api_key)
 
     # Chargement de l'index vectoriel (base documentaire)
     embeddings = OpenAIEmbeddings()

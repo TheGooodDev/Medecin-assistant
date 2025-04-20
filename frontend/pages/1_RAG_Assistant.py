@@ -9,6 +9,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")
 import streamlit as st
 from app.rag_engine import ask_question
 from app import config
+from app.utils import load_api_key  # ✅ Nouvelle version qui gère clé API utilisateur
 import traceback
 
 
@@ -26,6 +27,14 @@ st.markdown("""
 Pose ta question ci-dessous ✉️
 Le modèle te répondra à partir des documents PDF que tu as indexés.
 """)
+
+# 🔑 Champ pour que l'utilisateur saisisse sa propre clé API (optionnel)
+user_api_key = st.sidebar.text_input(
+    "🔑 Ta clé OpenAI (optionnelle)",
+    type="password",
+    placeholder="sk-...",
+    help="Si vide, la clé par défaut sera utilisée (sécurisée)."
+)
 
 # 🖋️ Entrée utilisateur : Question
 question = st.text_input(
@@ -46,12 +55,15 @@ with st.expander("⚙️ Paramètres du modèle"):
 if st.button("📤 Poser la question") and question:
     with st.spinner("🤖 Le modèle réfléchit..."):
         try:
+            # ✅ Charge la bonne clé API (user ou fallback)
+            load_api_key(user_api_key)
+
             result = ask_question(
                 question=question,
                 model_name=model,
                 temperature=temperature,
                 k=k
-            )
+                )
 
             # 🔸 Layout en deux colonnes
             col_left, col_right = st.columns([2, 1])
