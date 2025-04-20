@@ -1,0 +1,49 @@
+# 📦 Environnement virtuel
+.venv/
+env/
+venv/
+
+# 🔐 Fichiers sensibles
+.env
+*.env
+
+
+# 📄 Données personnelles
+data/*.pdf
+data/*.docx
+data/*.txt
+
+# 🧪 Résidus de tests / notebooks
+__pycache__/
+*.pyc
+*.pyo
+*.ipynb_checkpoints
+*.log
+
+# 🧪 Streamlit et cache
+frontend/.streamlit/
+.streamlit/
+frontend/__pycache__/
+frontend/.pytest_cache/
+frontend/.ipynb_checkpoints/
+
+# 📁 Dossiers temporaires
+*.tmp
+*.bak
+.DS_Store
+Thumbs.db
+
+# 🚀 Déploiement local
+/.mypy_cache/
+/dist/
+/build/
+/site/
+
+# 📚 Jupyter
+*.ipynb
+.ipynb_checkpoints/
+
+# 💻 IDEs
+.vscode/
+.idea/
+*.code-workspace
