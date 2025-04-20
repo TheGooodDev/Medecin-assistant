@@ -1,3 +1,5 @@
+# 🔁 Patch pour forcer le redeploiement sur Streamlit
+
 from dotenv import load_dotenv
 import os
 
