@@ -5,3 +5,5 @@ langchain-community
 langchain-openai
 python-dotenv
 streamlit
+faiss-cpu
+
