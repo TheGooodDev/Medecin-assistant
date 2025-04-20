@@ -30,7 +30,7 @@ Le modèle te répondra à partir des documents PDF que tu as indexés.
 # 🖋️ Entrée utilisateur : Question
 question = st.text_input(
     "❓ Ta question :",
-    placeholder="Ex: Qui est Mohcine El Harass ?"
+    placeholder="Ex: Ask me ! The World is yours."
 )
 
 # ⚙️ Paramètres avancés (modèle, température, top-k)
