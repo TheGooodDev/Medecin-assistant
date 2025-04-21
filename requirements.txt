@@ -15,5 +15,3 @@ pdf2image
 pymupdf
 pathlib
 Pillow
-textwrap
-base64
