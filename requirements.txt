@@ -13,3 +13,7 @@ xgboost
 statsmodels
 pdf2image
 pymupdf
+pathlib
+PIL
+textwrap
+base64
