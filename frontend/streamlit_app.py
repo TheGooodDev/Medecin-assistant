@@ -93,7 +93,7 @@ with hero_left:
 
 with hero_right:
     # Display portrait instead of GIF
-    photo_b64 = b64_asset("../assets/charif.JPG")
+    photo_b64 = b64_asset("../assets/images/charif.JPG")
     if photo_b64:
         st.markdown(
             f"<div class='gif-wrap'><img src='data:image/jpeg;base64,{photo_b64}' alt='Charif EL JAZOULI' style='border-radius:8px; width:180px;' /></div>",

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI
 from app.rag_engine import ask_question
 from app import config  # 👈 on importe la config ici
 
