@@ -49,14 +49,15 @@ question = st.text_input(
     placeholder="Ex: Ask me ! The World is yours."
 )
 
-# load the key 
-load_api_key(user_api_key)
 
 
 # 🚀 Bouton d'envoi de la question
 if st.button("📤 Poser la question") and question:
     with st.spinner("🤖 Le modèle réfléchit..."):
         try:
+            # load the key 
+            load_api_key(user_api_key)
+
             # Initialise les composants
             llm = OpenAILLM(model_name=model, temperature=temperature, user_api_key=user_api_key)
             retriever = FAISSRetriever(persist_path=config.VECTORSTORE_PATH)
@@ -133,15 +134,9 @@ if session_docs:
     if st.button("📤 Interroger le document") and question:
         with st.spinner("💡 Génération en cours..."):
             try:
-                # result = run_rag_on_uploaded_docs(
-                #     docs=session_docs,
-                #     question=question,
-                #     model=model,
-                #     temperature=temperature,
-                #     k=k,
-                #     user_api_key=user_api_key
-                # )
-
+                
+                # load the key 
+                load_api_key(user_api_key)
                 # Pour le mode "temporaire"
                 llm = OpenAILLM(model_name=model, temperature=temperature, user_api_key=user_api_key)
                 retriever = TemporaryFAISSRetriever(docs=session_docs)
