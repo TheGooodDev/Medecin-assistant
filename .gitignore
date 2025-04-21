@@ -21,8 +21,6 @@ __pycache__/
 *.log
 
 # 🧪 Streamlit et cache
-frontend/.streamlit/
-.streamlit/
 frontend/__pycache__/
 frontend/.pytest_cache/
 frontend/.ipynb_checkpoints/
