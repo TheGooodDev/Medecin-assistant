@@ -45,3 +45,6 @@ Thumbs.db
 .vscode/
 .idea/
 *.code-workspace
+
+# Debug 
+frontend/pages/99_99_Debug_API_Test.py
