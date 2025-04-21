@@ -1,22 +1,17 @@
-# frontend/streamlit_app.py
 import sys
 import os
-
 # 🔧 Ajout du dossier parent pour les imports depuis app/
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-from app.utils_streamlit import display_model_config
-from app.rag_temp_engine import run_rag_on_uploaded_docs
+
 from langchain_community.document_loaders import PyPDFLoader
 import tempfile
-
-
-# ✅ Les imports de ton application doivent venir APRÈS
 import streamlit as st
-from app.rag_engine import ask_question
-from app import config
-from app.utils import load_api_key  # ✅ Nouvelle version qui gère clé API utilisateur
 import traceback
+from app import config
+from app.utils.utils import load_api_key  
+from app.utils.utils_streamlit import display_model_config
+from app.rag_engine import RAGPipeline, FAISSRetriever, TemporaryFAISSRetriever,OpenAILLM
 
 
 # 🎨 Configuration de la page
@@ -54,24 +49,21 @@ question = st.text_input(
     placeholder="Ex: Ask me ! The World is yours."
 )
 
-# Visualisation utile pour debug
-# if "OPENAI_API_KEY_USED" in st.session_state:
-#     source = st.session_state["OPENAI_API_SOURCE"]
-#     masked_key = st.session_state["OPENAI_API_KEY_USED"][:6] + "..." + st.session_state["OPENAI_API_KEY_USED"][-4:]
-#     st.info(f"🔐 Clé utilisée ({source}) : `{masked_key}`")
+# load the key 
+load_api_key(user_api_key)
 
 
 # 🚀 Bouton d'envoi de la question
 if st.button("📤 Poser la question") and question:
     with st.spinner("🤖 Le modèle réfléchit..."):
         try:
-            result = ask_question(
-                question=question,
-                model_name=model,
-                temperature=temperature,
-                k=k,
-                user_api_key=user_api_key  # 👈 AJOUT ICI
-                )
+            # Initialise les composants
+            llm = OpenAILLM(model_name=model, temperature=temperature, user_api_key=user_api_key)
+            retriever = FAISSRetriever(persist_path=config.VECTORSTORE_PATH)
+            pipeline = RAGPipeline(retriever=retriever, llm=llm)
+
+            # Pose la question
+            result = pipeline.ask(question, k=k)
 
             # 🔸 Layout en deux colonnes
             col_left, col_right = st.columns([2, 1])
@@ -141,14 +133,20 @@ if session_docs:
     if st.button("📤 Interroger le document") and question:
         with st.spinner("💡 Génération en cours..."):
             try:
-                result = run_rag_on_uploaded_docs(
-                    docs=session_docs,
-                    question=question,
-                    model=model,
-                    temperature=temperature,
-                    k=k,
-                    user_api_key=user_api_key
-                )
+                # result = run_rag_on_uploaded_docs(
+                #     docs=session_docs,
+                #     question=question,
+                #     model=model,
+                #     temperature=temperature,
+                #     k=k,
+                #     user_api_key=user_api_key
+                # )
+
+                # Pour le mode "temporaire"
+                llm = OpenAILLM(model_name=model, temperature=temperature, user_api_key=user_api_key)
+                retriever = TemporaryFAISSRetriever(docs=session_docs)
+                pipeline = RAGPipeline(retriever=retriever, llm=llm)
+                result = pipeline.ask(question, k=k)
 
                 st.success("🧠 Réponse :")
                 st.markdown(result["result"])

@@ -1,109 +1,83 @@
-import argparse
+# app/rag_components.py
+
+import sys
+import os
+# 🔧 Ajout du dossier parent pour les imports depuis app/
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+
+# === 0. Import Packages ===
+from abc import ABC, abstractmethod
 from langchain_community.vectorstores import FAISS
-from langchain_openai import ChatOpenAI
+from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain.text_splitter import CharacterTextSplitter
 from langchain.chains import RetrievalQA
-# from langchain.embeddings import OpenAIEmbeddings
-from langchain_openai import OpenAIEmbeddings
-from app.utils import load_api_key
-from app import config
+
+# === 1. Base Retriever ===
+class BaseRetriever(ABC):
+    @abstractmethod
+    def retrieve(self, query: str, k: int):
+        pass
 
 
-def ask_question(
-    question: str,
-    model_name: str,
-    temperature: float,
-    k: int,
-    persist_path: str = "vectorstore",
-    user_api_key: str = None  # 👈 AJOUT ICI
-) -> None:
-    """
-    Pose une question à un LLM avec un contexte documentaire vectorisé (RAG).
+# === 2. FAISS Retriever ===
+class FAISSRetriever(BaseRetriever):
+    def __init__(self, persist_path: str = "vectorstore"):
+        self.persist_path = persist_path
+        self.embeddings = OpenAIEmbeddings()
+        self.vectordb = FAISS.load_local(
+            persist_path,
+            self.embeddings,
+            allow_dangerous_deserialization=True
+        )
 
-    Args:
-        question (str): La question posée par l'utilisateur.
-        model_name (str): Le nom du modèle OpenAI à utiliser.
-        temperature (float): Température de génération (plus élevée = plus créatif).
-        k (int): Nombre de documents à récupérer via recherche vectorielle.
-        persist_path (str): Chemin vers l'index FAISS enregistré.
+    def retrieve(self, query: str, k: int):
+        return self.vectordb.as_retriever(search_kwargs={"k": k})
+    
 
-    Returns:
-        None
-    """
-    # Chargement de la clé API depuis .env
-    load_api_key(user_api_key=user_api_key)
+# === 2. TEMP FAISS Retriever ===
+class TemporaryFAISSRetriever(BaseRetriever):
+    def __init__(self, docs, chunk_size=500, chunk_overlap=50):
+        splitter = CharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+        chunks = splitter.split_documents(docs)
+        embeddings = OpenAIEmbeddings()
+        self.vectordb = FAISS.from_documents(chunks, embeddings)
 
-    # Chargement de l'index vectoriel (base documentaire)
-    embeddings = OpenAIEmbeddings()
-    vectordb = FAISS.load_local(
-        persist_path, embeddings, allow_dangerous_deserialization=True
-    )  # 🔥 Obligatoire depuis LangChain 0.1+)
+    def retrieve(self, query: str, k: int):
+        return self.vectordb.as_retriever(search_kwargs={"k": k})
 
-    # Initialisation du modèle LLM OpenAI
-    llm = ChatOpenAI(model_name=model_name, temperature=temperature)
+# === 3. Base LLM ===
+class BaseLLM(ABC):
+    @abstractmethod
+    def answer(self, question: str, documents: list):
+        pass
 
-    # Construction de la chaîne RAG (retrieval + question)
-    qa_chain = RetrievalQA.from_chain_type(
-        llm=llm,
-        retriever=vectordb.as_retriever(search_kwargs={"k": k}),
-        return_source_documents=True,
-    )
 
-    # Exécution de la requête
-    result = qa_chain.invoke({"query": question})
+# === 4. OpenAI LLM ===
+class OpenAILLM(BaseLLM):
+    def __init__(self, model_name: str, temperature: float, user_api_key: str = None):
+        # load_api_key(user_api_key)
+        self.llm = ChatOpenAI(model_name=model_name, temperature=temperature)
 
-    # Affichage du résultat
-    print("🧠 Réponse :\n", result["result"])
-    print("\n📄 Sources :")
-    for doc in result["source_documents"]:
-        print("-", doc.metadata.get("source", "Sans source"))
+    def answer(self, question: str, retriever):
+        qa_chain = RetrievalQA.from_chain_type(
+            llm=self.llm,
+            retriever=retriever,
+            return_source_documents=True,
+        )
+        return qa_chain.invoke({"query": question})
 
-    # ✅ Retourne la réponse (pour l’API ou test)
-    return {
-        "result": result["result"],
-        "source_documents": result["source_documents"]
-    }
 
-if __name__ == "__main__":
-    # Initialisation du parser de la ligne de commande
-    parser = argparse.ArgumentParser(
-        description="Poser une question à ton assistant RAG basé sur OpenAI"
-    )
+# === 5. RAG Pipeline ===
+class RAGPipeline:
+    def __init__(self, retriever: BaseRetriever, llm: BaseLLM):
+        self.retriever = retriever
+        self.llm = llm
 
-    parser.add_argument(
-        "--model",
-        type=str,
-        default=config.DEFAULT_MODEL,
-        help="Nom du modèle OpenAI (ex: gpt-3.5-turbo, gpt-4)",
-    )
-    parser.add_argument(
-        "--temperature",
-        type=float,
-        default=config.DEFAULT_TEMPERATURE,
-        help="Température du modèle (0.0 = déterministe, 1.0 = créatif)",
-    )
-    parser.add_argument(
-        "--k",
-        type=int,
-        default=config.DEFAULT_K,
-        help="Nombre de documents pertinents à récupérer",
-    )
-    parser.add_argument(
-        "--question",
-        type=str,
-        required=False,
-        help="Question à poser (sinon posée en interactif)",
-    )
-
-    args = parser.parse_args()
-
-    # Récupération de la question (via argument ou input)
-    if args.question:
-        question = args.question
-    else:
-        question = input("❓ Pose ta question : ")
-
-    # Exécution principale
-    ask_question(
-        question=question, model_name=args.model, temperature=args.temperature, k=args.k
-    )
-
+    def ask(self, question: str, k: int = 3):
+        retriever = self.retriever.retrieve(question, k)
+        result = self.llm.answer(question, retriever)
+        return {
+            "result": result["result"],
+            "source_documents":  result.get("source_documents", [])
+        }
