@@ -4,7 +4,7 @@ import os
 # 🔧 Ajout du dossier parent pour les imports depuis app/
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 import streamlit as st
-import fitz  # PyMuPDF
+import fitz
 from PIL import Image
 import os
 import io
