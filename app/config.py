@@ -14,4 +14,5 @@ DEFAULT_K = 3
 # Chemins
 DATA_FOLDER = "data"
 VECTORSTORE_PATH = "vectorstore"
+DATA_FOLDER_AVOCAT = f"{DATA_FOLDER}/loi_marocaine/"
 INDEX_TRACKING_FILE = f"{VECTORSTORE_PATH}/indexed_files.json"

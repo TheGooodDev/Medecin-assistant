@@ -49,5 +49,10 @@ Thumbs.db
 # Debug 
 frontend/pages/99_99_Debug_API_Test.py
 
-#Personal files 
+#Personal files or in construction logic
 learn/
+scripts/
+data/loi_marocaine/
+app/watchdog_engine.py
+
+
