@@ -8,8 +8,8 @@ Contient :
 
 # Modèle et paramètres LLM
 DEFAULT_MODEL = "gpt-3.5-turbo"
-DEFAULT_TEMPERATURE = 0.2
-DEFAULT_K = 3
+DEFAULT_TEMPERATURE = 0
+DEFAULT_K = 8
 
 # Chemins
 DATA_FOLDER = "data"

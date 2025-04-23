@@ -32,7 +32,7 @@ class FAISSRetriever(BaseRetriever):
         )
 
     def retrieve(self, query: str, k: int):
-        return self.vectordb.as_retriever(search_kwargs={"k": k})
+        return self.vectordb.as_retriever(search_type="similarity", search_kwargs={"k": k})
     
 
 # === 2. TEMP FAISS Retriever ===
