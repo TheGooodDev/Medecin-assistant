@@ -24,6 +24,7 @@ __pycache__/
 frontend/__pycache__/
 frontend/.pytest_cache/
 frontend/.ipynb_checkpoints/
+.streamlit/
 
 # 📁 Dossiers temporaires
 *.tmp
